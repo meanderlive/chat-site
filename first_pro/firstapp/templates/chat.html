@@ -1,0 +1,1262 @@
+<!--
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat with {{ receiver.username }}</title>
+
+
+</head>
+<body>
+    <h1>Chat with {{ receiver.username }}</h1>
+    <textarea id="chat-log" cols="100" rows="20" readonly>
+        {% for message in messages %}
+            {{ message.sender.username }}: {{ message.content }}
+        {% endfor %}
+    </textarea><br>
+    <input id="chat-message-input" type="text" size="100"><br>
+    <input id="chat-message-submit" type="button" value="Send">
+    <a href="{% url 'user_list' %}">Back to users</a>
+
+<script>
+        const username = "{{ request.user.username }}";
+        const receiver = "{{ receiver.username }}";
+        const chatSocket = new WebSocket(
+            'ws://' + window.location.host + '/ws/chat/' + receiver + '/'
+        );
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            document.querySelector('#chat-log').value += (data.sender + ': ' + data.message + '\n');
+        };
+
+        chatSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+
+        document.querySelector('#chat-message-input').focus();
+        document.querySelector('#chat-message-input').onkeyup = function(e) {
+            if (e.keyCode === 13) {  // enter, return
+                document.querySelector('#chat-message-submit').click();
+            }
+        };
+
+        document.querySelector('#chat-message-submit').onclick = function(e) {
+            const messageInputDom = document.querySelector('#chat-message-input');
+            const message = messageInputDom.value;
+            chatSocket.send(JSON.stringify({
+                'message': message
+            }));
+            messageInputDom.value = '';
+        };
+    </script>
+</body>
+</html>
+-->
+
+<!-- this is correct -->
+<!--
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat with {{ receiver.username }}</title>
+</head>
+<body>
+    <h1>Chat with {{ receiver.username }}</h1>
+    <textarea id="chat-log" cols="100" rows="20" readonly>
+        {% for message in messages %}
+            {{ message.sender.username }}: {{ message.content }}
+        {% endfor %}
+    </textarea><br>
+    <input id="chat-message-input" type="text" size="100"><br>
+    <input id="chat-message-submit" type="button" value="Send">
+    <a href="{% url 'user_list' %}">Back to users</a>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const username = "{{ request.user.username }}";
+            const receiver = "{{ receiver.username }}";
+            const chatSocket = new WebSocket(
+                'ws://' + window.location.host + '/ws/chat/' + receiver + '/'
+            );
+
+            chatSocket.onmessage = function(e) {
+                const data = JSON.parse(e.data);
+                const chatLog = document.querySelector('#chat-log');
+                chatLog.value += (data.sender + ': ' + data.message + '\n');
+                chatLog.scrollTop = chatLog.scrollHeight;
+            };
+
+            chatSocket.onclose = function(e) {
+                console.error('Chat socket closed unexpectedly');
+            };
+
+            const chatMessageInput = document.querySelector('#chat-message-input');
+            const chatMessageSubmit = document.querySelector('#chat-message-submit');
+
+            if (chatMessageInput) {
+                chatMessageInput.focus();
+                chatMessageInput.onkeyup = function(e) {
+                    if (e.keyCode === 13) {  // enter, return
+                        chatMessageSubmit.click();
+                    }
+                };
+            }
+
+            if (chatMessageSubmit) {
+                chatMessageSubmit.onclick = function(e) {
+                    const message = chatMessageInput.value;
+                    chatSocket.send(JSON.stringify({
+                        'message': message
+                    }));
+                    chatMessageInput.value = '';
+                };
+            }
+        });
+    </script>
+</body>
+</html>
+-->
+
+<!--
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat with {{ receiver.username }}</title>
+    <style>
+        #chat-log {
+            width: 100%;
+            height: 300px;
+            overflow-y: scroll;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+<h1>Chat with {{ receiver.username }}</h1>
+<div id="chat-log">
+    {% for message in messages %}
+    <p><strong>{{ message.sender.username }}:</strong> {{ message.content }}</p>
+    {% endfor %}
+</div><br>
+<input id="chat-message-input" type="text" size="100"><br>
+<input id="chat-message-submit" type="button" value="Send">
+<a href="{% url 'user_list' %}">Back to users</a>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const username = "{{ request.user.username }}";
+        const receiver = "{{ receiver.username }}";
+        const chatSocket = new WebSocket(
+            'ws://' + window.location.host + '/ws/chat/' + receiver + '/'
+        );
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            const chatLog = document.querySelector('#chat-log');
+            const messageElement = document.createElement('p');
+            messageElement.innerHTML = '<strong>' + data.sender + ':</strong> ' + data.message;
+            chatLog.appendChild(messageElement);
+            chatLog.scrollTop = chatLog.scrollHeight;
+        };
+
+        chatSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+
+        const chatMessageInput = document.querySelector('#chat-message-input');
+        const chatMessageSubmit = document.querySelector('#chat-message-submit');
+
+        if (chatMessageInput) {
+            chatMessageInput.focus();
+            chatMessageInput.onkeyup = function(e) {
+                if (e.keyCode === 13) {  // enter, return
+                    chatMessageSubmit.click();
+                }
+            };
+        }
+
+        if (chatMessageSubmit) {
+            chatMessageSubmit.onclick = function(e) {
+                const message = chatMessageInput.value;
+                chatSocket.send(JSON.stringify({
+                    'message': message
+                }));
+                chatMessageInput.value = '';
+            };
+        }
+    });
+</script>
+</body>
+</html>
+-->
+
+<!--
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat with {{ receiver_profile.name }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+    <style>
+        /* Include the CSS from the provided example */
+        .--dark-theme {
+            --chat-background: rgba(10, 14, 14, 0.95);
+            --chat-panel-background: #131719;
+            --chat-bubble-background: #14181a;
+            --chat-bubble-active-background: #171a1b;
+            --chat-add-button-background: #212324;
+            --chat-send-button-background: #8147fc;
+            --chat-text-color: #a3a3a3;
+            --chat-options-svg: #a3a3a3;
+        }
+
+        body {
+            background: url(https://images.unsplash.com/photo-1495808985667-ba4ce2ef31b3?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1050&q=80);
+            background-size: cover;
+        }
+
+        #chat {
+            background: var(--chat-background);
+            max-width: 600px;
+            margin: 25px auto;
+            box-sizing: border-box;
+            padding: 1em;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+        #chat::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url(https://images.unsplash.com/photo-1495808985667-ba4ce2ef31b3?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1050&q=80) fixed;
+            z-index: -1;
+        }
+        #chat .btn-icon {
+            position: relative;
+            cursor: pointer;
+        }
+        #chat .btn-icon svg {
+            stroke: #FFF;
+            fill: #FFF;
+            width: 50%;
+            height: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        #chat .chat__conversation-board {
+            padding: 1em 0 2em;
+            height: calc(100vh - 55px - 2em - 25px * 2 - .5em - 3em);
+            overflow: auto;
+        }
+        #chat .chat__conversation-board__message-container.reversed {
+            flex-direction: row-reverse;
+        }
+        #chat .chat__conversation-board__message-container.reversed .chat__conversation-board__message__bubble {
+            position: relative;
+        }
+        #chat .chat__conversation-board__message-container.reversed .chat__conversation-board__message__bubble span:not(:last-child) {
+            margin: 0 0 2em 0;
+        }
+        #chat .chat__conversation-board__message-container.reversed .chat__conversation-board__message__person {
+            margin: 0 0 0 1.2em;
+        }
+        #chat .chat__conversation-board__message-container.reversed .chat__conversation-board__message__options {
+            align-self: center;
+            position: absolute;
+            left: 0;
+            display: none;
+        }
+        #chat .chat__conversation-board__message-container {
+            position: relative;
+            display: flex;
+            flex-direction: row;
+        }
+        #chat .chat__conversation-board__message-container:hover .chat__conversation-board__message__options {
+            display: flex;
+            align-items: center;
+        }
+        #chat .chat__conversation-board__message-container:hover .option-item:not(:last-child) {
+            margin: 0 0.5em 0 0;
+        }
+        #chat .chat__conversation-board__message-container:not(:last-child) {
+            margin: 0 0 2em 0;
+        }
+        #chat .chat__conversation-board__message__person {
+            text-align: center;
+            margin: 0 1.2em 0 0;
+        }
+        #chat .chat__conversation-board__message__person__avatar {
+            height: 35px;
+            width: 35px;
+            overflow: hidden;
+            border-radius: 50%;
+            -webkit-user-select: none;
+               -moz-user-select: none;
+                -ms-user-select: none;
+                    user-select: none;
+            ms-user-select: none;
+            position: relative;
+        }
+        #chat .chat__conversation-board__message__person__avatar::before {
+            content: "";
+            position: absolute;
+            height: 100%;
+            width: 100%;
+        }
+        #chat .chat__conversation-board__message__person__avatar img {
+            height: 100%;
+            width: auto;
+        }
+        #chat .chat__conversation-board__message__person__nickname {
+            font-size: 9px;
+            color: #484848;
+            -webkit-user-select: none;
+               -moz-user-select: none;
+                -ms-user-select: none;
+                    user-select: none;
+            display: none;
+        }
+        #chat .chat__conversation-board__message__context {
+            max-width: 55%;
+            align-self: flex-end;
+        }
+        #chat .chat__conversation-board__message__options {
+            align-self: center;
+            position: absolute;
+            right: 0;
+            display: none;
+        }
+        #chat .chat__conversation-board__message__options .option-item {
+            border: 0;
+            background: 0;
+            padding: 0;
+            margin: 0;
+            height: 16px;
+            width: 16px;
+            outline: none;
+        }
+        #chat .chat__conversation-board__message__options .emoji-button svg {
+            stroke: var(--chat-options-svg);
+            fill: transparent;
+            width: 100%;
+        }
+        #chat .chat__conversation-board__message__options .more-button svg {
+            stroke: var(--chat-options-svg);
+            fill: transparent;
+            width: 100%;
+        }
+        #chat .chat__conversation-board__message__bubble span {
+            width: -webkit-fit-content;
+            width: -moz-fit-content;
+            width: fit-content;
+            display: inline-block;
+            padding: .5em 1em;
+            margin: 0 0 0.5em;
+            background: var(--chat-bubble-background);
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 16px;
+            color: var(--chat-text-color);
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+        #chat .chat__conversation-board__message__bubble span:not(:last-child) {
+            margin: 0 0 2em 0;
+        }
+        #chat .chat__conversation-board__message__bubble {
+            position: relative;
+        }
+        #chat .chat__conversation-board__message__bubble.active span {
+            background: var(--chat-bubble-active-background);
+        }
+        #chat .chat__conversation-board__message__bubble.active span::after {
+            display: block;
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: var(--chat-send-button-background);
+            border-radius: 50%;
+            position: absolute;
+            right: .8em;
+            bottom: -.9em;
+        }
+        #chat .chat__conversation-panel {
+            position: fixed;
+            bottom: 25px;
+            left: 0;
+            right: 0;
+            margin: auto;
+            width: 100%;
+            max-width: 600px;
+            box-sizing: border-box;
+            padding: .5em 1em;
+            background: var(--chat-panel-background);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        #chat .chat__conversation-panel__container {
+            display: flex;
+            flex-direction: row;
+        }
+        #chat .chat__conversation-panel__button {
+            border: 0;
+            background: 0;
+            padding: 0;
+            margin: 0;
+            outline: none;
+            height: 32px;
+            width: 32px;
+            border-radius: 50%;
+            background: var(--chat-add-button-background);
+            align-self: center;
+            position: relative;
+            cursor: pointer;
+        }
+        #chat .chat__conversation-panel__input {
+            border: 0;
+            background: 0;
+            padding: 0;
+            margin: 0;
+            color: #FFF;
+            height: 100%;
+            font-size: 14px;
+            line-height: 16px;
+            outline: none;
+            flex: 1;
+            align-self: center;
+            padding: 0 1em;
+            font-family: Lato;
+        }
+        #chat .chat__conversation-panel__input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+        #chat .chat__conversation-panel__button.send-button {
+            background: var(--chat-send-button-background);
+        }
+        .container {
+            margin: 0 auto;
+            max-width: 600px;
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #09f;
+            animation: spin 1s ease infinite;
+        }
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        .spinner-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .hide {
+            display: none;
+        }
+        .chat__main-header__profile__avatar {
+            border-radius: 50%;
+            overflow: hidden;
+            height: 50px;
+            width: 50px;
+        }
+        .chat__main-header__profile__avatar img {
+            width: 100%;
+            height: auto;
+        }
+        .chat__main-header__profile__meta {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-left: 10px;
+        }
+        .chat__main-header__profile__name {
+            color: #fff;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .chat__main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: var(--chat-panel-background);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .chat__main-header__container {
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+<h1>Chat with {{ receiver_profile.name }}</h1>
+<img src="{{ receiver_profile.image.url }}" alt="{{ receiver_profile.name }}" width="50" height="50">
+
+<textarea id="chat-log" cols="100" rows="20" readonly>
+        {% for message in messages %}
+            {{ message.timestamp|date:"Y-m-d H:i:s" }} - {{ message.sender.userprofile.name }}: {{ message.content }}
+        {% endfor %}
+    </textarea><br>
+<input id="chat-message-input" type="text" size="100"><br>
+<input id="chat-message-submit" type="button" value="Send">
+<a href="{% url 'user_list' %}">Back to users</a>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const receiver = "{{ receiver.username }}";
+        const chatSocket = new WebSocket(
+            'ws://' + window.location.host + '/ws/chat/' + receiver + '/'
+        );
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            const chatLog = document.querySelector('#chat-log');
+            chatLog.value += (data.timestamp + ' - ' + data.sender_name + ': ' + data.message + '\n');
+            chatLog.scrollTop = chatLog.scrollHeight;
+        };
+
+        chatSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+
+        const chatMessageInput = document.querySelector('#chat-message-input');
+        const chatMessageSubmit = document.querySelector('#chat-message-submit');
+
+        if (chatMessageInput) {
+            chatMessageInput.focus();
+            chatMessageInput.onkeyup = function(e) {
+                if (e.keyCode === 13) {  // enter, return
+                    chatMessageSubmit.click();
+                }
+            };
+        }
+
+        if (chatMessageSubmit) {
+            chatMessageSubmit.onclick = function(e) {
+                const message = chatMessageInput.value;
+                chatSocket.send(JSON.stringify({
+                    'message': message
+                }));
+                chatMessageInput.value = '';
+            };
+        }
+    });
+</script>
+</body>
+</html>
+-->
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat with {{ receiver_profile.name }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+    <style>
+        /* Include the CSS from the provided example */
+        .--dark-theme {
+            --chat-background: rgba(10, 14, 14, 0.95);
+            --chat-panel-background: #131719;
+            --chat-bubble-background: #14181a;
+            --chat-bubble-active-background: #171a1b;
+            --chat-add-button-background: #212324;
+            --chat-send-button-background: #8147fc;
+            --chat-text-color: #a3a3a3;
+            --chat-options-svg: #a3a3a3;
+        }
+
+        body {
+            background: url(https://images.unsplash.com/photo-1495808985667-ba4ce2ef31b3?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1050&q=80);
+            background-size: cover;
+        }
+
+        #chat {
+            background: var(--chat-background);
+            max-width: 600px;
+            margin: 25px auto;
+            box-sizing: border-box;
+            padding: 1em;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+        #chat::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url(https://images.unsplash.com/photo-1495808985667-ba4ce2ef31b3?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1050&q=80) fixed;
+            z-index: -1;
+        }
+        #chat .btn-icon {
+            position: relative;
+            cursor: pointer;
+        }
+        #chat .btn-icon svg {
+            stroke: #FFF;
+            fill: #FFF;
+            width: 50%;
+            height: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        #chat .chat__conversation-board {
+            padding: 1em 0 2em;
+            height: calc(100vh - 55px - 2em - 25px * 2 - .5em - 3em);
+            overflow: auto;
+        }
+        #chat .chat__conversation-board__message-container.reversed {
+            flex-direction: row-reverse;
+        }
+        #chat .chat__conversation-board__message-container.reversed .chat__conversation-board__message__bubble {
+            position: relative;
+        }
+        #chat .chat__conversation-board__message-container.reversed .chat__conversation-board__message__bubble span:not(:last-child) {
+            margin: 0 0 2em 0;
+        }
+        #chat .chat__conversation-board__message-container.reversed .chat__conversation-board__message__person {
+            margin: 0 0 0 1.2em;
+        }
+        #chat .chat__conversation-board__message-container.reversed .chat__conversation-board__message__options {
+            align-self: center;
+            position: absolute;
+            left: 0;
+            display: none;
+        }
+        #chat .chat__conversation-board__message-container {
+            position: relative;
+            display: flex;
+            flex-direction: row;
+        }
+        #chat .chat__conversation-board__message-container:hover .chat__conversation-board__message__options {
+            display: flex;
+            align-items: center;
+        }
+        #chat .chat__conversation-board__message-container:hover .option-item:not(:last-child) {
+            margin: 0 0.5em 0 0;
+        }
+        #chat .chat__conversation-board__message-container:not(:last-child) {
+            margin: 0 0 2em 0;
+        }
+        #chat .chat__conversation-board__message__person {
+            text-align: center;
+            margin: 0 1.2em 0 0;
+        }
+        #chat .chat__conversation-board__message__person__avatar {
+            height: 35px;
+            width: 35px;
+            overflow: hidden;
+            border-radius: 50%;
+            -webkit-user-select: none;
+               -moz-user-select: none;
+                -ms-user-select: none;
+                    user-select: none;
+            ms-user-select: none;
+            position: relative;
+        }
+        #chat .chat__conversation-board__message__person__avatar::before {
+            content: "";
+            position: absolute;
+            height: 100%;
+            width: 100%;
+        }
+        #chat .chat__conversation-board__message__person__avatar img {
+            height: 100%;
+            width: auto;
+        }
+        #chat .chat__conversation-board__message__person__nickname {
+            font-size: 9px;
+            color: #484848;
+            -webkit-user-select: none;
+               -moz-user-select: none;
+                -ms-user-select: none;
+                    user-select: none;
+            display: none;
+        }
+        #chat .chat__conversation-board__message__context {
+            max-width: 55%;
+            align-self: flex-end;
+        }
+        #chat .chat__conversation-board__message__options {
+            align-self: center;
+            position: absolute;
+            right: 0;
+            display: none;
+        }
+        #chat .chat__conversation-board__message__options .option-item {
+            border: 0;
+            background: 0;
+            padding: 0;
+            margin: 0;
+            height: 16px;
+            width: 16px;
+            outline: none;
+        }
+        #chat .chat__conversation-board__message__options .emoji-button svg {
+            stroke: var(--chat-options-svg);
+            fill: var(--chat-options-svg);
+            height: 14px;
+            width: 14px;
+        }
+        #chat .chat__conversation-board__message__bubble {
+            display: flex;
+            flex-direction: column;
+            background: var(--chat-bubble-background);
+            border-radius: 16px;
+            padding: 0.75em 1em;
+            color: var(--chat-text-color);
+        }
+        #chat .chat__conversation-board__message__bubble span:not(:last-child) {
+            margin: 0 0 0.5em 0;
+        }
+        #chat .chat__conversation-board__message__bubble span:last-child {
+            font-size: 9px;
+            color: #484848;
+            text-align: right;
+        }
+        #chat .chat__conversation-board__message__bubble:hover {
+            background: var(--chat-bubble-active-background);
+        }
+        #chat .chat__conversation-board__message__bubble:hover .chat__conversation-board__message__person__nickname {
+            display: block;
+        }
+        #chat .chat__conversation-panel {
+            height: 55px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding: 0.25em;
+
+        }
+        #chat .chat__conversation-panel .chat__conversation-panel__container {
+            position: relative;
+            height: 100%;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            background: var(--chat-panel-background);
+            border-radius: 12px;
+
+        }
+        #chat .chat__conversation-panel .chat__conversation-panel__container .chat__conversation-panel__input {
+            width: 100%;
+            border: 0;
+            background: var(--chat-panel-background);
+            height: 100%;
+            border-radius: 12px;
+            padding: 0 3em 0 1.5em;
+            color: var(--chat-text-color);
+        }
+        #chat .chat__conversation-panel .chat__conversation-panel__container .chat__conversation-panel__input::-webkit-input-placeholder {
+            color: var(--chat-text-color);
+        }
+        #chat .chat__conversation-panel .chat__conversation-panel__container .chat__conversation-panel__input:-ms-input-placeholder {
+            color: var(--chat-text-color);
+        }
+        #chat .chat__conversation-panel .chat__conversation-panel__container .chat__conversation-panel__input::placeholder {
+            color: var(--chat-text-color);
+        }
+        #chat .chat__conversation-panel .chat__conversation-panel__container .chat__conversation-panel__input:focus {
+            outline: none;
+        }
+
+        #chat .chat__conversation-panel .chat__conversation-panel__container .chat__conversation-panel__button {
+    position: relative;
+    height: calc(100% - 2px);
+            width: calc(35px - 2px);
+            border-radius: 100%;
+            background: transparent;
+            border: 0;
+            padding: 0;
+            margin: 0;
+            outline: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+}
+<!--button.chat__conversation-panel__button {-->
+<!--width: 100px;-->
+<!--height: 100px;-->
+<!--}-->
+#chat .chat__conversation-panel .chat__conversation-panel__container .chat__conversation-panel__button svg {
+    width: 16px;
+    height: 16px;
+    stroke: #FFF;
+    fill: none; /* Ensure no fill if only stroke is needed */
+}
+
+#chat .chat__conversation-panel .chat__conversation-panel__container .chat__conversation-panel__button:first-child svg {
+    stroke: #FFF; /* For 'plus' icon */
+}
+
+#chat .chat__conversation-panel .chat__conversation-panel__container .chat__conversation-panel__button:last-child svg {
+    fill: #FFF; /* For 'send' icon */
+}
+
+        @media (max-width: 520px) {
+            #chat {
+                margin: 10px auto;
+                padding: 1em 0.5em;
+            }
+
+            #chat .chat__conversation-panel {
+                height: 45px;
+            }
+        }
+    </style>
+</head>
+<body class="--dark-theme">
+<div id="chat" class="chat">
+    <div class="chat__conversation-board" id="chat-log"></div>
+    <div class="chat__conversation-panel">
+        <div class="chat__conversation-panel__container">
+            <button class="chat__conversation-panel__button">
+                <svg class="icon" data-feather="plus"></svg>
+<!--                <svg class="icon icon-feather-plus">-->
+<!--                    <use xlink:href="#icon-feather-plus"></use>-->
+<!--                </svg>-->
+            </button>
+            <input type="text" id="chat-message-input" class="chat__conversation-panel__input" placeholder="Type a message...">
+            <button class="chat__conversation-panel__button" id="chat-message-submit">
+                <svg class="icon" data-feather="send"></svg>
+<!--                <svg class="icon icon-feather-send">-->
+<!--                    <use xlink:href="#icon-feather-send"></use>-->
+<!--                </svg>-->
+
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/feather-icons"></script>
+<script>
+    feather.replace();
+</script>
+
+<script>
+    const chatSocket = new WebSocket(
+        'ws://' + window.location.host + '/ws/chat/{{ room_name }}/'
+    );
+
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        const message = data.message;
+        const sender = data.sender;
+        const senderName = data.sender_name;
+        const senderImage = data.sender_image;
+        const timestamp = data.timestamp;
+
+        const chatLog = document.getElementById('chat-log');
+        const messageContainer = document.createElement('div');
+        messageContainer.classList.add('chat__conversation-board__message-container');
+
+        if (sender === '{{ user.username }}') {
+            messageContainer.classList.add('reversed');
+        }
+
+        messageContainer.innerHTML = `
+            <div class="chat__conversation-board__message__person">
+                <div class="chat__conversation-board__message__person__avatar">
+                    <img src="${senderImage}" alt="${senderName}">
+                </div>
+            </div>
+            <div class="chat__conversation-board__message__context">
+                <div class="chat__conversation-board__message__bubble">
+                    <span>${message}</span>
+
+                </div>
+            </div>
+        `;
+
+        chatLog.appendChild(messageContainer);
+        chatLog.scrollTop = chatLog.scrollHeight;
+    };
+
+    chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+
+    document.getElementById('chat-message-input').focus();
+    document.getElementById('chat-message-input').onkeyup = function(e) {
+        if (e.keyCode === 13) {  // Enter key
+            document.getElementById('chat-message-submit').click();
+        }
+    };
+
+    document.getElementById('chat-message-submit').onclick = function(e) {
+        const messageInputDom = document.getElementById('chat-message-input');
+        const message = messageInputDom.value;
+        chatSocket.send(JSON.stringify({
+            'message': message
+        }));
+        messageInputDom.value = '';
+    };
+</script>
+</body>
+</html>
+
+
+<!--
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat with {{ receiver_profile.name }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+    <style>
+        /* Include the CSS from the provided example */
+        .--dark-theme {
+            --chat-background: rgba(10, 14, 14, 0.95);
+            --chat-panel-background: #131719;
+            --chat-bubble-background: #14181a;
+            --chat-bubble-active-background: #171a1b;
+            --chat-add-button-background: #212324;
+            --chat-send-button-background: #8147fc;
+            --chat-text-color: #a3a3a3;
+            --chat-options-svg: #a3a3a3;
+        }
+
+        body {
+            background: url(https://images.unsplash.com/photo-1495808985667-ba4ce2ef31b3?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1050&q=80);
+            background-size: cover;
+        }
+
+        #chat {
+            background: var(--chat-background);
+            max-width: 600px;
+            margin: 25px auto;
+            box-sizing: border-box;
+            padding: 1em;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+        #chat::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url(https://images.unsplash.com/photo-1495808985667-ba4ce2ef31b3?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1050&q=80) fixed;
+            z-index: -1;
+        }
+        #chat .btn-icon {
+            position: relative;
+            cursor: pointer;
+        }
+        #chat .btn-icon svg {
+            stroke: #FFF;
+            fill: #FFF;
+            width: 50%;
+            height: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        #chat .chat__conversation-board {
+            padding: 1em 0 2em;
+            height: calc(100vh - 55px - 2em - 25px * 2 - .5em - 3em);
+            overflow: auto;
+        }
+        #chat .chat__conversation-board__message-container.reversed {
+            flex-direction: row-reverse;
+        }
+        #chat .chat__conversation-board__message-container.reversed .chat__conversation-board__message__bubble {
+            position: relative;
+        }
+        #chat .chat__conversation-board__message-container.reversed .chat__conversation-board__message__bubble span:not(:last-child) {
+            margin: 0 0 2em 0;
+        }
+        #chat .chat__conversation-board__message-container.reversed .chat__conversation-board__message__person {
+            margin: 0 0 0 1.2em;
+        }
+        #chat .chat__conversation-board__message-container.reversed .chat__conversation-board__message__options {
+            align-self: center;
+            position: absolute;
+            left: 0;
+            display: none;
+        }
+        #chat .chat__conversation-board__message-container {
+            position: relative;
+            display: flex;
+            flex-direction: row;
+        }
+        #chat .chat__conversation-board__message-container:hover .chat__conversation-board__message__options {
+            display: flex;
+            align-items: center;
+        }
+        #chat .chat__conversation-board__message-container:hover .option-item:not(:last-child) {
+            margin: 0 0.5em 0 0;
+        }
+        #chat .chat__conversation-board__message-container:not(:last-child) {
+            margin: 0 0 2em 0;
+        }
+        #chat .chat__conversation-board__message__person {
+            text-align: center;
+            margin: 0 1.2em 0 0;
+        }
+        #chat .chat__conversation-board__message__person__avatar {
+            height: 35px;
+            width: 35px;
+            overflow: hidden;
+            border-radius: 50%;
+            -webkit-user-select: none;
+               -moz-user-select: none;
+                -ms-user-select: none;
+                    user-select: none;
+            ms-user-select: none;
+            position: relative;
+        }
+        #chat .chat__conversation-board__message__person__avatar::before {
+            content: "";
+            position: absolute;
+            height: 100%;
+            width: 100%;
+        }
+        #chat .chat__conversation-board__message__person__avatar img {
+            height: 100%;
+            width: auto;
+        }
+        #chat .chat__conversation-board__message__person__nickname {
+            font-size: 9px;
+            color: #484848;
+            -webkit-user-select: none;
+               -moz-user-select: none;
+                -ms-user-select: none;
+                    user-select: none;
+            display: none;
+        }
+        #chat .chat__conversation-board__message__context {
+            max-width: 55%;
+            align-self: flex-end;
+        }
+        #chat .chat__conversation-board__message__options {
+            align-self: center;
+            position: absolute;
+            right: 0;
+            display: none;
+        }
+        #chat .chat__conversation-board__message__options .option-item {
+            border: 0;
+            background: 0;
+            padding: 0;
+            margin: 0;
+            height: 16px;
+            width: 16px;
+            outline: none;
+        }
+        #chat .chat__conversation-board__message__options .emoji-button svg {
+            stroke: var(--chat-options-svg);
+            fill: var(--chat-options-svg);
+            height: 14px;
+            width: 14px;
+        }
+        #chat .chat__conversation-board__message__bubble {
+            display: flex;
+            flex-direction: column;
+            background: var(--chat-bubble-background);
+            border-radius: 16px;
+            padding: 0.75em 1em;
+            color: var(--chat-text-color);
+        }
+        #chat .chat__conversation-board__message__bubble span:not(:last-child) {
+            margin: 0 0 0.5em 0;
+        }
+        #chat .chat__conversation-board__message__bubble span:last-child {
+            font-size: 9px;
+            color: #484848;
+            text-align: right;
+        }
+        #chat .chat__conversation-board__message__bubble:hover {
+            background: var(--chat-bubble-active-background);
+        }
+        #chat .chat__conversation-board__message__bubble:hover .chat__conversation-board__message__person__nickname {
+            display: block;
+        }
+        #chat .chat__conversation-panel {
+            height: 55px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding: 0.25em;
+        }
+        #chat .chat__conversation-panel .chat__conversation-panel__container {
+            position: relative;
+            height: 100%;
+            width: 100%;
+            display: flex;
+            align-items: center;
+        }
+        #chat .chat__conversation-panel .chat__conversation-panel__container .chat__conversation-panel__input {
+            width: 100%;
+            border: 0;
+            background: var(--chat-panel-background);
+            height: 100%;
+            border-radius: 12px;
+            padding: 0 3em 0 1.5em;
+            color: var(--chat-text-color);
+        }
+        #chat .chat__conversation-panel .chat__conversation-panel__container .chat__conversation-panel__input::-webkit-input-placeholder {
+            color: var(--chat-text-color);
+        }
+        #chat .chat__conversation-panel .chat__conversation-panel__container .chat__conversation-panel__input:-ms-input-placeholder {
+            color: var(--chat-text-color);
+        }
+        #chat .chat__conversation-panel .chat__conversation-panel__container .chat__conversation-panel__input::placeholder {
+            color: var(--chat-text-color);
+        }
+        #chat .chat__conversation-panel .chat__conversation-panel__container .chat__conversation-panel__input:focus {
+            outline: none;
+        }
+        #chat .chat__conversation-panel .chat__conversation-panel__container .chat__conversation-panel__button {
+            position: absolute;
+            height: calc(100% - 2px);
+            width: calc(35px - 2px);
+            border-radius: 50%;
+            background: var(--chat-panel-background);
+            border: 0;
+            padding: 0;
+            margin: 0;
+            outline: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #chat .chat__conversation-panel .chat__conversation-panel__container .chat__conversation-panel__button:first-child {
+            left: 1px;
+        }
+        #chat .chat__conversation-panel .chat__conversation-panel__container .chat__conversation-panel__button:last-child {
+            right: 1px;
+        }
+        #chat .chat__conversation-panel .chat__conversation-panel__container .chat__conversation-panel__button svg {
+            height: 16px;
+            width: 16px;
+        }
+        #chat .chat__conversation-panel .chat__conversation-panel__container .chat__conversation-panel__button .icon-feather-plus {
+            stroke: #FFF;
+        }
+        #chat .chat__conversation-panel .chat__conversation-panel__container .chat__conversation-panel__button .icon-feather-send {
+            fill: #FFF;
+        }
+
+        @media (max-width: 520px) {
+            #chat {
+                margin: 10px auto;
+                padding: 1em 0.5em;
+            }
+
+            #chat .chat__conversation-panel {
+                height: 45px;
+            }
+        }
+    </style>
+</head>
+<body class="--dark-theme">
+<div id="chat" class="chat">
+    <div class="chat__conversation-board" id="chat-log"></div>
+    <div class="chat__conversation-panel">
+        <div class="chat__conversation-panel__container">
+            <button class="chat__conversation-panel__button">
+                <svg class="icon icon-feather-plus">
+                    <use xlink:href="#icon-feather-plus"></use>
+                </svg>
+            </button>
+            <input type="text" id="chat-message-input" class="chat__conversation-panel__input" placeholder="Type a message...">
+            <button class="chat__conversation-panel__button" id="chat-message-submit">
+                <svg class="icon icon-feather-send">
+                    <use xlink:href="#icon-feather-send"></use>
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const chatSocket = new WebSocket(
+        'ws://' + window.location.host + '/ws/chat/{{ room_name }}/'
+    );
+
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        const message = data.message;
+        const sender = data.sender;
+        const senderName = data.sender_name;
+        const senderImage = data.sender_image;
+        const timestamp = data.timestamp;
+
+        const chatLog = document.getElementById('chat-log');
+        const messageContainer = document.createElement('div');
+        messageContainer.classList.add('chat__conversation-board__message-container');
+
+        if (sender === '{{ user.username }}') {
+            messageContainer.classList.add('reversed');
+        }
+
+        messageContainer.innerHTML = `
+            <div class="chat__conversation-board__message__person">
+                <div class="chat__conversation-board__message__person__avatar">
+                    <img src="${senderImage}" alt="${senderName}">
+                </div>
+            </div>
+            <div class="chat__conversation-board__message__context">
+                <div class="chat__conversation-board__message__bubble">
+                    <span>${message}</span>
+                    <span>${timestamp}</span>
+                </div>
+            </div>
+        `;
+
+        chatLog.appendChild(messageContainer);
+        chatLog.scrollTop = chatLog.scrollHeight;
+    };
+
+    chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+
+    document.getElementById('chat-message-input').focus();
+    document.getElementById('chat-message-input').onkeyup = function(e) {
+        if (e.keyCode === 13) {
+            document.getElementById('chat-message-submit').click();
+        }
+    };
+
+    document.getElementById('chat-message-submit').onclick = function(e) {
+        const messageInputDom = document.getElementById('chat-message-input');
+        const message = messageInputDom.value;
+        chatSocket.send(JSON.stringify({
+            'message': message
+        }));
+        messageInputDom.value = '';
+    };
+</script>
+</body>
+</html>
+ -->
